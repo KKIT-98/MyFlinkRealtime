@@ -23,6 +23,11 @@ public class Constant {
     public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
     /**MySQL驱动地址*/
     public static final String MYSQL_URL = "jdbc:mysql://hadoop102:3306?useSSL=false";
+    /**配置表存储的库名*/
+    public static final String PROCESS_DATABASE = "gmall2023_config";
+    /**配置表名*/
+    public static final String PROCESS_DIM_TABLE_NAME = "table_process_dim";
+
 
     public static final String TOPIC_DWD_TRAFFIC_START = "dwd_traffic_start";
     public static final String TOPIC_DWD_TRAFFIC_ERR = "dwd_traffic_err";

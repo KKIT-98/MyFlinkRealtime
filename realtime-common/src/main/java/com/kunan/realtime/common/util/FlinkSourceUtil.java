@@ -1,5 +1,8 @@
 package com.kunan.realtime.common.util;
 import com.kunan.realtime.common.constant.Constant;
+import com.ververica.cdc.connectors.mysql.source.MySqlSource;
+import com.ververica.cdc.connectors.mysql.table.StartupOptions;
+import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.common.typeinfo.BasicTypeInfo;
@@ -12,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 
 
 public class FlinkSourceUtil {
+    //KafkaSource工具类
     public static KafkaSource<String> getKafkaSource(String ckAndGroupId,String topicName){
         return KafkaSource.<String>builder()
                         .setBootstrapServers(Constant.KAFKA_BROKERS) //设置kafka连接地址
@@ -44,5 +48,18 @@ public class FlinkSourceUtil {
                         )
                         .build();
 
+    }
+    //MySQLSource工具类
+    public static MySqlSource<String> getMySqlSource(String databaseName,String tableName){
+        return MySqlSource.<String>builder()
+                .hostname(Constant.MYSQL_HOST)
+                .port(Constant.MYSQL_PORT)
+                .username(Constant.MYSQL_USER_NAME)
+                .password(Constant.MYSQL_PASSWORD)
+                .databaseList(databaseName)
+                .tableList(databaseName + "." + tableName) //因为支持从多个库读取，会出现找不到情况，这里使用库名.表名的方式
+                .deserializer(new JsonDebeziumDeserializationSchema()) //json格式反序列化
+                .startupOptions(StartupOptions.initial())  //初始化读取方式
+                .build();
     }
 }
