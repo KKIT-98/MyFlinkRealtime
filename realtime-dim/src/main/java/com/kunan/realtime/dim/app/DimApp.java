@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kunan.realtime.common.base.BaseAPP;
 import com.kunan.realtime.common.constant.Constant;
 import com.kunan.realtime.common.util.FlinkSourceUtil;
+import com.kunan.realtime.common.util.HBaseUtil;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
@@ -11,10 +12,13 @@ import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
+import org.apache.hadoop.hbase.client.Connection;
 
 public class DimApp extends BaseAPP {
     public static void main(String[] args) {
@@ -65,11 +69,47 @@ public class DimApp extends BaseAPP {
         DataStreamSource<String> MysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "mysql_source")
                 .setParallelism(1);
         MysqlSource.print();
-        //3.做成广播流
-        //4.在Hbase创建维度表
+        //3.在Hbase创建维度表
+
+        MysqlSource.flatMap(new RichFlatMapFunction<String, JSONObject>() {
+            public Connection connection;
+            @Override
+            public void open(Configuration parameters) throws Exception {
+                //获取连接
+                connection = HBaseUtil.getHbaseConnection();
+            }
+
+            @Override
+            public void close() throws Exception {
+                //关闭连接
+                 HBaseUtil.CloseHbaseConnection(connection);
+            }
+
+            @Override
+            public void flatMap(String value, Collector<JSONObject> out) throws Exception {
+                //使用读取的配置表在HBase中创建与之对应的表
+                try {
+                    JSONObject jsonObject = JSONObject.parseObject(value);
+
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        //4.做成广播流
+
+
         //5.连接主流和广播流
+
+
         //6.筛选出需要写出的字段
+
+
         //7.写出到Hbase
+
     }
 
     public void etl(SingleOutputStreamOperator<String> stream) {

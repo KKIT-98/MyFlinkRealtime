@@ -17,8 +17,7 @@ public class Constant {
     public static final String MYSQL_USER_NAME = "root";
     /**MySQL密码*/
     public static final String MYSQL_PASSWORD = "000000";
-    /**Hbase命名空间*/
-    public static final String HBASE_NAMESPACE = "gmall";
+
     /**MySQL驱动类*/
     public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
     /**MySQL驱动地址*/
@@ -27,8 +26,10 @@ public class Constant {
     public static final String PROCESS_DATABASE = "gmall2023_config";
     /**配置表名*/
     public static final String PROCESS_DIM_TABLE_NAME = "table_process_dim";
-
-
+    /**HBase的连接地址*/
+    public static final String HBASE_ZOOKEEPER_QUORUM = "192.168.31.102,192.168.31.103,192.168.31.104";
+    /**Hbase命名空间*/
+    public static final String HBASE_NAMESPACE = "gmall";
     public static final String TOPIC_DWD_TRAFFIC_START = "dwd_traffic_start";
     public static final String TOPIC_DWD_TRAFFIC_ERR = "dwd_traffic_err";
     public static final String TOPIC_DWD_TRAFFIC_PAGE = "dwd_traffic_page";
