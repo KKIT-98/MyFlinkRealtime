@@ -21,7 +21,7 @@ public class Constant {
     /**MySQL驱动类*/
     public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
     /**MySQL驱动地址*/
-    public static final String MYSQL_URL = "jdbc:mysql://hadoop102:3306?useSSL=false";
+    public static final String MYSQL_URL = "jdbc:mysql://192.168.31.102:3306?useSSL=false";
     /**配置表存储的库名*/
     public static final String PROCESS_DATABASE = "gmall2023_config";
     /**配置表名*/
