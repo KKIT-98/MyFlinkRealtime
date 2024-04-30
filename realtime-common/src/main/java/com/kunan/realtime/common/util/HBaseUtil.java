@@ -79,7 +79,7 @@ public class HBaseUtil {
         try {//不影响主程序运行 捕获异常
             admin.createTable(tableDescriptorBuilder.build());
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("当前Hbase表已存在，无需重复创建" + "【" + namespace + ":" + table + "】");
         }
 
         //4.关闭admin
