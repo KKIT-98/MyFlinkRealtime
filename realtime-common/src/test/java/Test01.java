@@ -19,7 +19,7 @@ public class Test01 {
        // env.setStateBackend(new HashMapStateBackend());
         // 1.4 状态后端及检查点相关配置
         // 1.4.1 设置状态后端
-        env.setStateBackend(new HashMapStateBackend());
+        /*env.setStateBackend(new HashMapStateBackend());
 
         // 1.4.2 开启 checkpoint
         env.enableCheckpointing(5000);
@@ -36,7 +36,7 @@ public class Test01 {
         // 1.4.8 job 取消时 checkpoint 保留策略
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(RETAIN_ON_CANCELLATION);
 
-
+*/
         //3.读取数据
         DataStreamSource<String> kafkaSource = env.fromSource(
                 KafkaSource.<String>builder()

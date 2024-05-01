@@ -49,7 +49,7 @@ public class DimApp extends BaseAPP {
                     JSONObject jsonObject = JSONObject.parseObject(value);
                     String database = jsonObject.getString("database");
                     String type = jsonObject.getString("type");
-                    JSONObject date = jsonObject.getJSONObject("date");
+                    JSONObject date = jsonObject.getJSONObject("data");
                     if ("gmall".equals(database) && //筛选采集到gmall数据库的数据
                     !"bootstrap-start".equals(type) &&  !"bootstrap-complete".equals(type) //采集的数据type不含bootstrap-start 和 bootstrap-complete （maxwell全量同步标志）
                             && date != null && date.size() != 0)
@@ -73,15 +73,15 @@ public class DimApp extends BaseAPP {
 //================================================================================================================================================
         //1.2 第一种方式flatmap直接实现  可以使用idea ctrl + alt + m 进行封装 先选中 再按快捷键
        SingleOutputStreamOperator<JSONObject> jsonObjectStream = etl(stream);
-        //System.out.println("===============================对ods读取的原始数据进行清洗==================================");
-        //System.out.println(jsonObjectStream);
+      //  System.out.println("===============================对ods读取的原始数据进行清洗==================================");
+       // jsonObjectStream.print();
 
         //2.使用FlinkCDC读取监控配置表数据
         MySqlSource<String> mySqlSource = FlinkSourceUtil.getMySqlSource(Constant.PROCESS_DATABASE, Constant.PROCESS_DIM_TABLE_NAME);
         DataStreamSource<String> MysqlSource = env.fromSource(mySqlSource, WatermarkStrategy.noWatermarks(), "mysql_source")
                 .setParallelism(1);
-        //System.out.println("===============================FlinkCDC读取监控配置表数据==================================");
-        //MysqlSource.print();
+       //System.out.println("===============================FlinkCDC读取监控配置表数据==================================");
+       //MysqlSource.print();
         //3.在Hbase创建维度表
 
         SingleOutputStreamOperator<TableProcessDim> createHbaseTableStream = createHBaseTable(MysqlSource);
@@ -227,7 +227,7 @@ public class DimApp extends BaseAPP {
                 JSONObject jsonObject = JSONObject.parseObject(value);
                 String database = jsonObject.getString("database");
                 String type = jsonObject.getString("type");
-                JSONObject date = jsonObject.getJSONObject("date");
+                JSONObject date = jsonObject.getJSONObject("data");
                 if ("gmall".equals(database) && //筛选采集到gmall数据库的数据
                         !"bootstrap-start".equals(type) && !"bootstrap-complete".equals(type) //采集的数据type不含bootstrap-start 和 bootstrap-complete （maxwell全量同步标志）
                         && date != null && date.size() != 0) {
