@@ -17,9 +17,10 @@ public class Constant {
     public static final String MYSQL_USER_NAME = "root";
     /**MySQL密码*/
     public static final String MYSQL_PASSWORD = "000000";
-
-    /**MySQL驱动类*/
-    public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
+    /**MySQL驱动类8.0*/
+    //public static final String MYSQL_DRIVER = "com.mysql.cj.jdbc.Driver";
+    /**MySQL驱动类5.7*/
+    public static final String MYSQL_DRIVER = "com.mysql.jdbc.Driver";
     /**MySQL驱动地址*/
     public static final String MYSQL_URL = "jdbc:mysql://192.168.31.102:3306?useSSL=false";
     /**配置表存储的库名*/

@@ -1,5 +1,6 @@
 package com.kunan.realtime.common.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.kunan.realtime.common.constant.Constant;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.TableName;
@@ -106,5 +107,61 @@ public class HBaseUtil {
         }
         //3.关闭admin
         admin.close();
+    }
+
+    /**
+     * 写入数据到HBase的方法
+     * @param connection 一个同步连接
+     * @param namespace 命名空间名称
+     * @param tableName 表名
+     * @param rowKey 主键
+     * @param family 列簇名
+     * @param data   列名和列值 jsonObject对象
+     * @throws IOException
+     */
+    public static void putCells(Connection connection, String namespace, String tableName, String rowKey, String family, JSONObject data) throws IOException {
+        // 1、获取table
+        Table table = connection.getTable(TableName.valueOf(namespace, tableName));
+        // 2、创建写入对象
+        Put put = new Put(Bytes.toBytes(rowKey));
+        for (String column : data.keySet()) {
+
+            String columnValue = data.getString(column);
+            if (columnValue != null ){
+                put.addColumn(Bytes.toBytes(family),Bytes.toBytes(column),Bytes.toBytes(columnValue));
+            }
+
+        }
+        // 3、调用方法写出数据
+        try {
+            table.put(put);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 4、关闭table
+        table.close();
+    }
+
+    /**
+     * 删除hbase一整行数据
+     * @param connection  一个同步连接
+     * @param namespace 命名空间名称
+     * @param tableName 表名
+     * @param rowKey 主键
+     * @throws IOException
+     */
+    public static void deleteCells(Connection connection, String namespace, String tableName, String rowKey) throws IOException {
+        // 1、获取table
+        Table table = connection.getTable(TableName.valueOf(namespace, tableName));
+        // 2、创建删除对象
+        Delete delete = new Delete(Bytes.toBytes(rowKey));
+        // 3、调用方法删除数据
+        try {
+            table.delete(delete);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // 4、关闭table
+        table.close();
     }
 }

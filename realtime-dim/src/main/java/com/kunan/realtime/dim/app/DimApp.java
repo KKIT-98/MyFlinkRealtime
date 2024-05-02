@@ -6,6 +6,9 @@ import com.kunan.realtime.common.bean.TableProcessDim;
 import com.kunan.realtime.common.constant.Constant;
 import com.kunan.realtime.common.util.FlinkSourceUtil;
 import com.kunan.realtime.common.util.HBaseUtil;
+import com.kunan.realtime.common.util.JDBCUtil;
+import com.kunan.realtime.dim.function.DimBroadcastFunction;
+import com.kunan.realtime.dim.function.DimHBaseSinkFunction;
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
 import com.ververica.cdc.debezium.JsonDebeziumDeserializationSchema;
@@ -25,10 +28,14 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
+import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.util.Collector;
 import org.apache.hadoop.hbase.client.Connection;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 public class DimApp extends BaseAPP {
     public static void main(String[] args) {
@@ -84,7 +91,7 @@ public class DimApp extends BaseAPP {
        //MysqlSource.print();
         //3.在Hbase创建维度表
 
-        SingleOutputStreamOperator<TableProcessDim> createHbaseTableStream = createHBaseTable(MysqlSource);
+        SingleOutputStreamOperator<TableProcessDim> createHbaseTableStream = createHBaseTable(MysqlSource).setParallelism(1);
 
        // System.out.println("===============================在HBASE中创建维度表==================================");
        // createHbaseTableStream.print();
@@ -96,64 +103,35 @@ public class DimApp extends BaseAPP {
         //System.out.println("===============================广播流==================================");
 
         //5.连接主流和广播流
-        BroadcastConnectedStream<JSONObject, TableProcessDim> connectStream = jsonObjectStream.connect(broadcastStateStream);
-        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> dimStream = connectStream.process(new BroadcastProcessFunction<JSONObject, TableProcessDim, Tuple2<JSONObject, TableProcessDim>>() {
-            /**
-             *  处理广播数据（配置流数据）
-             * @param tableProcessDim
-             * @param context
-             * @param collector
-             * @throws Exception
-             */
-            @Override
-            public void processBroadcastElement(TableProcessDim tableProcessDim
-                    , Context context
-                    , Collector<Tuple2<JSONObject, TableProcessDim>> collector) throws Exception {
-                //读取广播状态
-                BroadcastState<String, TableProcessDim> tableProcessState = context.getBroadcastState(broadcastState);
-                //将配置表信息作为一个维度表的标记 写到广播状态
-                String op = tableProcessDim.getOp();
-                if ("d".equals(op)) { //删除
-                    tableProcessState.remove(tableProcessDim.getSourceTable());
-                    //System.out.println("tableProcessState.remove(tableProcessDim.getSourceTable());");
-                } else {
-                    tableProcessState.put(tableProcessDim.getSourceTable(), tableProcessDim);
-                    //System.out.println(" tableProcessState.put(tableProcessDim.getSourceTable(), tableProcessDim);");
-                }
+        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> dimStream = connectStream(jsonObjectStream, broadcastState, broadcastStateStream);
+        //System.out.println("===============================连接主流和广播流==================================");
+        //dimStream.print();
+        //6.筛选出需要写出的字段
+        SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> filterColumnStream = filterColumn(dimStream);
+        filterColumnStream.print();
+        //7.写出到Hbase
+        filterColumnStream.addSink(new DimHBaseSinkFunction());
 
-            }
+    }
 
-            /**
-             * 处理主流数据
-             * @param jsonObject
-             * @param readOnlyContext
-             * @param collector
-             * @throws Exception
-             */
+    public SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> filterColumn(SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> dimStream) {
+        return dimStream.map(new MapFunction<Tuple2<JSONObject, TableProcessDim>, Tuple2<JSONObject, TableProcessDim>>() {
             @Override
-            public void processElement(JSONObject jsonObject
-                    , ReadOnlyContext readOnlyContext
-                    , Collector<Tuple2<JSONObject, TableProcessDim>> collector) throws Exception {
-                //读取广播状态
-                ReadOnlyBroadcastState<String, TableProcessDim> tableProcessState = readOnlyContext.getBroadcastState(broadcastState);
-                //查询广播状态 判断当前数据对应的表格是否存在状态中
-                String tableName = jsonObject.getString("table"); //获取表名
-                //System.out.println("控制台输出  获取表名" + tableName);
-                TableProcessDim tableProcessDim = tableProcessState.get(tableName);
-                if (tableProcessDim != null) {
-                    //状态不为空 说明当前一行数据是维度表数据 收集数据
-                    //System.out.println("控制台输出=> " + tableProcessDim);
-                    collector.collect(Tuple2.of(jsonObject, tableProcessDim));
-                }
+            public Tuple2<JSONObject, TableProcessDim> map(Tuple2<JSONObject, TableProcessDim> value) throws Exception {
+                JSONObject jsonObject = value.f0;
+                TableProcessDim dim = value.f1;
+                String sinkColumns = dim.getSinkColumns();
+                List<String> columns = Arrays.asList(sinkColumns.split(","));
+                JSONObject data = jsonObject.getJSONObject("data");
+                data.keySet().removeIf(key -> !columns.contains(key)); //将不不包含 data的删除true 删除  false保留
+                return value;
             }
         });
-        //System.out.println("===============================连接主流和广播流==================================");
-        dimStream.print();
-        //6.筛选出需要写出的字段
+    }
 
-
-        //7.写出到Hbase
-
+    public static SingleOutputStreamOperator<Tuple2<JSONObject, TableProcessDim>> connectStream(SingleOutputStreamOperator<JSONObject> jsonObjectStream, MapStateDescriptor<String, TableProcessDim> broadcastState, BroadcastStream<TableProcessDim> broadcastStateStream) {
+        BroadcastConnectedStream<JSONObject, TableProcessDim> connectStream = jsonObjectStream.connect(broadcastStateStream);
+        return connectStream.process(new DimBroadcastFunction(broadcastState)).setParallelism(1);
     }
 
     public SingleOutputStreamOperator<TableProcessDim> createHBaseTable(DataStreamSource<String> mysqlSource) {
