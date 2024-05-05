@@ -7,6 +7,10 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+## 2024-05-05
+
+dwd层日志拆分数据清洗etl实现
+
 ## 2024-05-02
 1.使用JDBC实现配置表预加载（防止主流数据过快导致数据丢失）
 
@@ -55,7 +59,6 @@
 ## 2024-04-28
 Hbase创建关闭连接、创建、删除表格API工具类实现
 
-
 ## 2024-4-27
 1.对ODS数据进行清洗转换及代码封装 Ctrl+alt+m
 2.使用FlinkCDC读取监控配置表数据及封装MySQLSource工具类
@@ -68,15 +71,14 @@ Hbase创建关闭连接、创建、删除表格API工具类实现
 
 3.FlinkCDC(监测并捕获数据库的变动)存储配置表实时更新
     创建新库+配置表 开启配置表binlog
-```java
+
+```text
 报错:  
 The MySQL server has a timezone offset (14400 seconds behind UTC) which does not match the configured timezone Asia/Shanghai
-
 处理:修改mysql 配置文件my.conf
 添加:
 default-time-zone = '+8:00'
 重启mysql服务: sudo systemctl restart mysqld
-
 ```
 
 ## 2024-04-24
