@@ -7,6 +7,31 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+## 2024-05-06
+
+新旧访客修复代码实现+etl数据测试用例
+
+```text
+
+--测试数据 etl
+
+{"common":{"ar":"11","uid":"137","os":"Android 13.0","ch":"xiaomi","is_new":"0","md":"xiaomi 12 ultra ","mid":"mid_485","vc":"v2.1.134","ba":"xiaomi","sid":"c7896d60-d0ec-4ddf-a085-f508c8e78019"},"page":{"page_id":"payment","item":"2783","during_time":6295,"item_type":"order_id","last_page_id":"order"},"ts":1712027492970}
+
+--去掉ts mid
+
+{"common":{"ar":"11","uid":"137","os":"Android 13.0","ch":"xiaomi","is_new":"0","md":"xiaomi 12 ultra ","vc":"v2.1.134","ba":"xiaomi","sid":"c7896d60-d0ec-4ddf-a085-f508c8e78019"},"page":{"page_id":"payment","item":"2783","during_time":6295,"item_type":"order_id","last_page_id":"order"}}
+
+--去掉mid
+{"common":{"ar":"11","uid":"137","os":"Android 13.0","ch":"xiaomi","is_new":"0","md":"xiaomi 12 ultra ","vc":"v2.1.134","ba":"xiaomi","sid":"c7896d60-d0ec-4ddf-a085-f508c8e78019"},"page":{"page_id":"payment","item":"2783","during_time":6295,"item_type":"order_id","last_page_id":"order"},"ts":1712027492970}
+
+
+--kafka生产发送
+
+kafka-console-producer.sh --bootstrap-server hadoop102:9092 --topic topic_log
+
+查看报错及是否过滤拦截
+```
+
 ## 2024-05-05
 
 dwd层日志拆分数据清洗etl实现
