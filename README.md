@@ -7,6 +7,51 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+## 2024-05-07
+
+1. 新旧访客修复代码测试
+
+```text
+
+1> 源数据
+
+{"common":{"ar":"14","uid":"763","os":"Android 13.0","ch":"wandoujia","is_new":"0","md":"vivo IQOO Z6x ","mid":"mid_443","vc":"v2.1.134","ba":"vivo","sid":"912dd068-3bd5-43a7-9e85-21dc17bdc7bd"},"page":{"page_id":"cart","during_time":7930,"last_page_id":"good_detail"},"displays":[{"pos_seq":0,"item":"2","item_type":"sku_id","pos_id":5},{"pos_seq":1,"item":"18","item_type":"sku_id","pos_id":5},{"pos_seq":2,"item":"6","item_type":"sku_id","pos_id":5},{"pos_seq":3,"item":"25","item_type":"sku_id","pos_id":5},{"pos_seq":4,"item":"34","item_type":"sku_id","pos_id":5},{"pos_seq":5,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":6,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":7,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":8,"item":"14","item_type":"sku_id","pos_id":5},{"pos_seq":9,"item":"20","item_type":"sku_id","pos_id":5},{"pos_seq":10,"item":"13","item_type":"sku_id","pos_id":5},{"pos_seq":11,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":12,"item":"27","item_type":"sku_id","pos_id":5},{"pos_seq":13,"item":"1","item_type":"sku_id","pos_id":5},{"pos_seq":14,"item":"8","item_type":"sku_id","pos_id":5},{"pos_seq":15,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":16,"item":"3","item_type":"sku_id","pos_id":5},{"pos_seq":17,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":18,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":19,"item":"13","item_type":"sku_id","pos_id":5}],"ts":1712026826799}
+
+2> 改造表示新访客
+
+"mid":"mid_443" --> "mid":"mid_4431"
+1712026826799 --> 1712113226000
+"is_new":"0"  --> "is_new":"1"
+
+{"common":{"ar":"14","uid":"763","os":"Android 13.0","ch":"wandoujia","is_new":"1","md":"vivo IQOO Z6x ","mid":"mid_4431","vc":"v2.1.134","ba":"vivo","sid":"912dd068-3bd5-43a7-9e85-21dc17bdc7bd"},"page":{"page_id":"cart","during_time":7930,"last_page_id":"good_detail"},"displays":[{"pos_seq":0,"item":"2","item_type":"sku_id","pos_id":5},{"pos_seq":1,"item":"18","item_type":"sku_id","pos_id":5},{"pos_seq":2,"item":"6","item_type":"sku_id","pos_id":5},{"pos_seq":3,"item":"25","item_type":"sku_id","pos_id":5},{"pos_seq":4,"item":"34","item_type":"sku_id","pos_id":5},{"pos_seq":5,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":6,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":7,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":8,"item":"14","item_type":"sku_id","pos_id":5},{"pos_seq":9,"item":"20","item_type":"sku_id","pos_id":5},{"pos_seq":10,"item":"13","item_type":"sku_id","pos_id":5},{"pos_seq":11,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":12,"item":"27","item_type":"sku_id","pos_id":5},{"pos_seq":13,"item":"1","item_type":"sku_id","pos_id":5},{"pos_seq":14,"item":"8","item_type":"sku_id","pos_id":5},{"pos_seq":15,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":16,"item":"3","item_type":"sku_id","pos_id":5},{"pos_seq":17,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":18,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":19,"item":"13","item_type":"sku_id","pos_id":5}],"ts":1712113226000}
+
+
+3> 把时间改到第二天 模拟程序卸载重装，is_new = 1 伪装成新用户
+1712113226000 --> 1712199626000  
+
+{"common":{"ar":"14","uid":"763","os":"Android 13.0","ch":"wandoujia","is_new":"1","md":"vivo IQOO Z6x ","mid":"mid_4431","vc":"v2.1.134","ba":"vivo","sid":"912dd068-3bd5-43a7-9e85-21dc17bdc7bd"},"page":{"page_id":"cart","during_time":7930,"last_page_id":"good_detail"},"displays":[{"pos_seq":0,"item":"2","item_type":"sku_id","pos_id":5},{"pos_seq":1,"item":"18","item_type":"sku_id","pos_id":5},{"pos_seq":2,"item":"6","item_type":"sku_id","pos_id":5},{"pos_seq":3,"item":"25","item_type":"sku_id","pos_id":5},{"pos_seq":4,"item":"34","item_type":"sku_id","pos_id":5},{"pos_seq":5,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":6,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":7,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":8,"item":"14","item_type":"sku_id","pos_id":5},{"pos_seq":9,"item":"20","item_type":"sku_id","pos_id":5},{"pos_seq":10,"item":"13","item_type":"sku_id","pos_id":5},{"pos_seq":11,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":12,"item":"27","item_type":"sku_id","pos_id":5},{"pos_seq":13,"item":"1","item_type":"sku_id","pos_id":5},{"pos_seq":14,"item":"8","item_type":"sku_id","pos_id":5},{"pos_seq":15,"item":"19","item_type":"sku_id","pos_id":5},{"pos_seq":16,"item":"3","item_type":"sku_id","pos_id":5},{"pos_seq":17,"item":"17","item_type":"sku_id","pos_id":5},{"pos_seq":18,"item":"28","item_type":"sku_id","pos_id":5},{"pos_seq":19,"item":"13","item_type":"sku_id","pos_id":5}],"ts":1712199626000}
+
+使用kafka发送，可以看到控制台打印的结果 is_new = 0，表示修复成功
+
+kafka-console-producer.sh --bootstrap-server hadoop102:9092 --topic topic_log
+
+```
+
+2.使用侧输出流对日志进行拆分实现+功能测试
+
+运行测试，可在控制台查输出的5条流数据
+
+```text
+
+page=> :3> {"common":{"ar":"14","uid":"763","os":"Android 13.0","ch":"wandoujia","is_new":"1","md":"vivo IQOO Z6x ","mid":"mid_4431","vc":"v2.1.134","ba":"vivo","sid":"912dd068-3bd5-43a7-9e85-21dc17bdc7bd"},"page":{"page_id":"cart","during_time":7930,"last_page_id":"good_detail"},"ts":1712113226000}
+display=> :3> {"pos_seq":1,"item":"18","common":{"ar":"14","uid":"763","os":"Android 13.0","ch":"wandoujia","is_new":"0","md":"vivo IQOO Z6x ","mid":"mid_4431","vc":"v2.1.134","ba":"vivo","sid":"912dd068-3bd5-43a7-9e85-21dc17bdc7bd"},"item_type":"sku_id","pos_id":5,"page":{"page_id":"cart","during_time":7930,"last_page_id":"good_detail"},"ts":1712199626000}
+action=> :4> {"item":"3","common":{"ar":"20","uid":"24","os":"Android 13.0","ch":"xiaomi","is_new":"0","md":"Redmi k50","mid":"mid_289","vc":"v2.1.134","ba":"Redmi","sid":"d448c905-c20a-40c6-80a8-50f562c8002b"},"action_id":"get_coupon","item_type":"coupon_id","page":{"page_id":"home","refer_id":"1","during_time":14363},"ts":1712025588726}
+start=> :4> {"common":{"ar":"22","uid":"716","os":"Android 13.0","ch":"xiaomi","is_new":"1","md":"xiaomi 13","mid":"mid_462","vc":"v2.1.132","ba":"xiaomi","sid":"d2578ffe-0b60-4a0b-b289-da4a3f3e8a45"},"start":{"entry":"install","open_ad_skip_ms":16648,"open_ad_ms":6801,"loading_time":3000,"open_ad_id":8},"ts":1712028525483}
+error=> :1> {"msg":" Exception in thread \\  java.net.SocketTimeoutException\\n \\tat com.atgugu.gmall2020.mock.bean.AppError.main(AppError.java:xxxxxx)","error_code":1795}
+
+```
+
+
 ## 2024-05-06
 
 新旧访客修复代码实现+etl数据测试用例
