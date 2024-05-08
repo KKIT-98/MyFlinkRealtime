@@ -31,10 +31,15 @@ public class Constant {
     public static final String HBASE_ZOOKEEPER_QUORUM = "192.168.31.102,192.168.31.103,192.168.31.104";
     /**Hbase命名空间*/
     public static final String HBASE_NAMESPACE = "gmall";
+    /**启动页面侧输出流发送到kafka的主题*/
     public static final String TOPIC_DWD_TRAFFIC_START = "dwd_traffic_start";
+    /**报错信息侧输出流发送到kafka的主题*/
     public static final String TOPIC_DWD_TRAFFIC_ERR = "dwd_traffic_err";
+    /**主流发送到kafka的主题*/
     public static final String TOPIC_DWD_TRAFFIC_PAGE = "dwd_traffic_page";
+    /**行动页面侧输出流发送到kafka的主题*/
     public static final String TOPIC_DWD_TRAFFIC_ACTION = "dwd_traffic_action";
+    /**曝光页面侧输出流发送到kafka的主题*/
     public static final String TOPIC_DWD_TRAFFIC_DISPLAY = "dwd_traffic_display";
 
     public static final String TOPIC_DWD_INTERACTION_COMMENT_INFO = "dwd_interaction_comment_info";

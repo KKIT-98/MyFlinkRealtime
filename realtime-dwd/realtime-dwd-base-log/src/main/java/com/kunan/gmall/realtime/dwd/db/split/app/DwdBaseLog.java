@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.kunan.realtime.common.base.BaseAPP;
 import com.kunan.realtime.common.constant.Constant;
 import com.kunan.realtime.common.util.DateFormatUtil;
+import com.kunan.realtime.common.util.FlinkSinkUtil;
 import org.apache.flink.api.common.eventtime.SerializableTimestampAssigner;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
@@ -109,11 +110,18 @@ public class DwdBaseLog extends BaseAPP {
         SideOutputDataStream<String> displayStream = pageStream.getSideOutput(displayTag);
         SideOutputDataStream<String> actionStream = pageStream.getSideOutput(actionTag);
         //控制台打印测试
-        pageStream.print("page=> ");
+        /*pageStream.print("page=> ");
         startStream.print("start=> ");
         errorStream.print("error=> ");
         displayStream.print("display=> ");
-        actionStream.print("action=> ");
+        actionStream.print("action=> ");*/
+
+        //将主流和侧输出流写入kafka
+        pageStream.sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_PAGE));
+        startStream.sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_START));
+        errorStream.sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_ERR));
+        displayStream.sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_DISPLAY));
+        actionStream.sinkTo(FlinkSinkUtil.getKafkaSink(Constant.TOPIC_DWD_TRAFFIC_ACTION));
 
 
     }

@@ -7,6 +7,31 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+
+## 2024-05-08
+
+将拆分后的日志流输出到Kafka
+
+```shell
+#启动kafka消费者消费数据验证是否发送到kafka
+
+# 主流
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_page
+
+#开始页面流
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_start
+
+#错误信息流
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_err
+
+#活动页面流
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_action
+
+#曝光页面流
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_display
+```
+
+
 ## 2024-05-07
 
 1. 新旧访客修复代码测试
