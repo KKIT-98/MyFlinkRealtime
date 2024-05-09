@@ -8,6 +8,12 @@
 > - 熟悉Linux
 >
 
+## 2024-05-09
+
+1.FlinkSQL读取Kafka、MySql数据测试
+2.FlinkSQL join两张表操作
+
+
 ## 2024-05-08
 
 将拆分后的日志流输出到Kafka
