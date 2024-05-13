@@ -2,11 +2,15 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
+import java.time.Duration;
+
 public class Test03 {
     public static void main(String[] args) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(4);
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+        //状态存活时间
+       // tableEnv.getConfig().setIdleStateRetention(Duration.ofSeconds(10L));
         //读取kafka
         tableEnv.executeSql("CREATE TABLE topic_db (\n" +
                 "`database` STRING,\n" +
@@ -14,7 +18,8 @@ public class Test03 {
                 "`ts` bigint,\n" +
                 "`data` map<STRING,STRING>,\n" +
                 "`old` map<STRING,STRING>,\n" +
-                "`type` STRING\n" +
+                "`type` STRING,\n" +
+                "proc_time  AS PROCTIME() \n" +
                 ") WITH (\n" +
                 "      'connector' = 'kafka',\n" +
                 "      'topic' = 'topic_db',\n" +
@@ -72,14 +77,15 @@ public class Test03 {
                 ",`data`['comment_txt'] as comment_txt\n" +
                 ",`data`['create_time'] as create_time\n" +
                 ",`data`['operate_time'] as operate_time\n" +
+                ",proc_time\n" +
                 "FROM topic_db\n" +
                 "WHERE `database` = 'gmall'\n" +
                 "AND `table` = 'comment_info'\n" +
                 "AND `type` = 'insert'");
         tableEnv.createTemporaryView("comment_info", commentInfo);
 
-        //
-        tableEnv.executeSql("SELECT\n" +
+        //使用join
+     /*   tableEnv.executeSql("SELECT\n" +
                         "a.id\n" +
                         ",a.user_id\n" +
                         ",a.nick_name\n" +
@@ -94,6 +100,25 @@ public class Test03 {
                         ",a.operate_time\n" +
                         "FROM comment_info a\n" +
                         "JOIN base_dic b\n" +
+                        "ON a.appraise = b.dic_code")
+                .print();*/
+
+        //使用时态关联 Event Time Temporal Join
+        tableEnv.executeSql("SELECT\n" +
+                        "a.id\n" +
+                        ",a.user_id\n" +
+                        ",a.nick_name\n" +
+                        ",a.head_img\n" +
+                        ",a.sku_id\n" +
+                        ",a.spu_id\n" +
+                        ",a.order_id\n" +
+                        ",a.appraise AS appraise_code\n" +
+                        ",b.dic_name as appraise_name\n" +
+                        ",a.comment_txt\n" +
+                        ",a.create_time\n" +
+                        ",a.operate_time\n" +
+                        "FROM comment_info a\n" +
+                        "JOIN base_dic FOR SYSTEM_TIME AS OF a.proc_time b\n" +
                         "ON a.appraise = b.dic_code")
                 .print();
 
