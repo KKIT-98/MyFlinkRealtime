@@ -25,4 +25,14 @@ public class SQLUtil {
                 "proc_time  AS PROCTIME() \n" +
                 ")" + getKafkaSourceSQL(Constant.TOPIC_DB,GroupId);
     }
+    //使用FlinkSql将数据写入kafka
+    public static String getKafkaSinkSQL(String topicName){
+        return "WITH (\n" +
+                "      'connector' = 'kafka',\n" +
+                "      'topic' = '" + topicName + "',\n" +
+                "      'properties.bootstrap.servers' = '" + Constant.KAFKA_BROKERS + "',\n" +
+                "      'format' = 'json'\n" +
+                ")";
+
+    }
 }

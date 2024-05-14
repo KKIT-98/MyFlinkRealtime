@@ -66,11 +66,11 @@ public abstract class BaseSQLAPP {
         handle(tableEnv,env,ckAndGroupId);
 
         //5.执行环境
-        try {
+       /* try {
             env.execute();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
     //读取topic_db数据

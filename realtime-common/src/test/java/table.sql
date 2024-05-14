@@ -114,3 +114,17 @@ PRIMARY KEY (rowkey) NOT ENFORCED
  'table-name' = 'gmall:dim_base_dic ',
  'zookeeper.quorum' = '192.168.31.102:2181'
 );
+
+
+
+id STRING
+,user_id STRING
+,nick_name STRING
+,sku_id STRING
+,spu_id STRING
+,order_id STRING
+,appraise_code STRING
+,appraise_name STRING
+,comment_txt STRING
+,create_time STRING
+,operate_time STRING

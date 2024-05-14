@@ -7,6 +7,29 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+## 2024-05-14
+1. 评论表事实表使用lookup join 关联实现维度退化(实际就是评论表关联评论维度表，取评价类型)
+2. 关联后的评论事实表写出kafka ```kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_interaction_comment_info```
+
+
+
+**遇到bug:**
+```text
+问题: 关联实现维度退化后打印评论事实表无结果
+排查: hbase维度表gmall:dim_base_dic没有数据 排查发现没有将mysql维度表数据同步到kafka
+解决: 使用maxwell将维度表初始化全量同步到kafka topic_db中 同步脚本: mysql_to_kafka_dim_init.sh
+```
+
+**报错:**
+```text
+评论事实表写出到kafka报错:
+No operators defined in streaming topology. Cannot execute.
+
+解决: 将构建FlinkSQL入口通用方法中的  env.execute(); 去掉即可
+
+```
+
+
 ## 2024-05-13
 
 1. lookup join使用

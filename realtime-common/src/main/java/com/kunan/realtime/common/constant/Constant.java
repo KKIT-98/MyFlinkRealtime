@@ -28,7 +28,7 @@ public class Constant {
     /**配置表名*/
     public static final String PROCESS_DIM_TABLE_NAME = "table_process_dim";
     /**HBase的连接地址*/
-    public static final String HBASE_ZOOKEEPER_QUORUM = "192.168.31.102,192.168.31.103,192.168.31.104";
+    public static final String HBASE_ZOOKEEPER_QUORUM = "192.168.31.102:2181,192.168.31.103:2181,192.168.31.104:2181";
     /**Hbase命名空间*/
     public static final String HBASE_NAMESPACE = "gmall";
     /**启动页面侧输出流发送到kafka的主题*/
