@@ -7,6 +7,27 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 >
+## 2024-05-15
+
+筛选加购事务事实表，并写出到kafka
+
+```text
+加购样例数据
+{"database":"gmall","table":"cart_info","type":"insert","ts":1654695779,"xid":2818373,"commit":true,"data":{"id":3332,"user_id":"480","sku_id":20,"cart_price":2899.00,"sku_num":1,"img_url":null,"sku_name":"apple","is_checked":null,"create_time":"2024-05-15 00:00:00","operate_time":null,"is_ordered":0,"order_time":null}}
+
+下单样例数据: 不是加购
+{"database":"gmall","table":"cart_info","type":"update","ts":1654695958,"xid":2818775,"commit":true,"data":{"id":3332,"user_id":"480","sku_id":20,"cart_price":2899.00,"sku_num":1,"img_url":null,"sku_name":"apple","is_checked":null,"create_time":"2024-05-15 00:00:00","operate_time":"2024-05-15 00:00:00","is_ordered":1,"order_time":"2024-05-15 00:30:00"},"old":{"operate_time":null,"is_ordered":0,"order_time":null}}
+
+未下单 继续加购样例数据算加购数据
+{"database":"gmall","table":"cart_info","type":"update","ts":1654696074,"xid":2819037,"commit":true,"data":{"id":3326,"user_id":"918","sku_id":26,"cart_price":129.00,"sku_num":3,"img_url":null,"sku_name":"索芙特i-Softto 口红不掉色唇膏保湿滋润 璀璨金钻哑光唇膏 Y01复古红 百搭气质 璀璨金钻哑光唇膏 ","is_checked":null,"create_time":"2024-04-02 11:17:50","operate_time":null,"is_ordered":0,"order_time":null},"old":{"sku_num":1}}
+    "sku_num":1  ==> "sku_num":3   
+    
+未下单 继续减购样例数据 
+{"database":"gmall","table":"cart_info","type":"update","ts":1654696234,"xid":2819397,"commit":true,"data":{"id":3326,"user_id":"918","sku_id":26,"cart_price":129.00,"sku_num":2,"img_url":null,"sku_name":"索芙特i-Softto 口红不掉色唇膏保湿滋润 璀璨金钻哑光唇膏 Y01复古红 百搭气质 璀璨金钻哑光唇膏 ","is_checked":null,"create_time":"2024-04-02 11:17:50","operate_time":null,"is_ordered":0,"order_time":null},"old":{"sku_num":3}}
+"sku_num":3  ==> "sku_num":2
+```
+
+
 ## 2024-05-14
 1. 评论表事实表使用lookup join 关联实现维度退化(实际就是评论表关联评论维度表，取评价类型)
 2. 关联后的评论事实表写出kafka ```kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_interaction_comment_info```

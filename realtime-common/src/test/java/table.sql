@@ -117,14 +117,68 @@ PRIMARY KEY (rowkey) NOT ENFORCED
 
 
 
+--id STRING
+--,user_id STRING
+--,nick_name STRING
+--,sku_id STRING
+--,spu_id STRING
+--,order_id STRING
+--,appraise_code STRING
+--,appraise_name STRING
+--,comment_txt STRING
+--,create_time STRING
+--,operate_time STRING
+
+--------------------------------
+--筛选加购数据
+--------------------------------
+--加购样例数据:
+--{"database":"gmall","table":"cart_info","type":"insert","ts":1654695779,"xid":2818373,"commit":true,"data":{"id":3332,"user_id":"480","sku_id":20,"cart_price":2899.00,"sku_num":1,"img_url":null,"sku_name":"apple","is_checked":null,"create_time":"2024-05-15 00:00:00","operate_time":null,"is_ordered":0,"order_time":null}}
+--下单样例数据: 不是加购
+--{"database":"gmall","table":"cart_info","type":"update","ts":1654695958,"xid":2818775,"commit":true,"data":{"id":3332,"user_id":"480","sku_id":20,"cart_price":2899.00,"sku_num":1,"img_url":null,"sku_name":"apple","is_checked":null,"create_time":"2024-05-15 00:00:00","operate_time":"2024-05-15 00:00:00","is_ordered":1,"order_time":"2024-05-15 00:30:00"},"old":{"operate_time":null,"is_ordered":0,"order_time":null}}
+--未下单 继续加购样例数据
+--{"database":"gmall","table":"cart_info","type":"update","ts":1654696074,"xid":2819037,"commit":true,"data":{"id":3326,"user_id":"918","sku_id":26,"cart_price":129.00,"sku_num":3,"img_url":null,"sku_name":"索芙特i-Softto 口红不掉色唇膏保湿滋润 璀璨金钻哑光唇膏 Y01复古红 百搭气质 璀璨金钻哑光唇膏 ","is_checked":null,"create_time":"2024-04-02 11:17:50","operate_time":null,"is_ordered":0,"order_time":null},"old":{"sku_num":1}}
+--"sku_num":1  ==> "sku_num":3   算加购数据
+--未下单 继续减购样例数据
+---{"database":"gmall","table":"cart_info","type":"update","ts":1654696234,"xid":2819397,"commit":true,"data":{"id":3326,"user_id":"918","sku_id":26,"cart_price":129.00,"sku_num":2,"img_url":null,"sku_name":"索芙特i-Softto 口红不掉色唇膏保湿滋润 璀璨金钻哑光唇膏 Y01复古红 百搭气质 璀璨金钻哑光唇膏 ","is_checked":null,"create_time":"2024-04-02 11:17:50","operate_time":null,"is_ordered":0,"order_time":null},"old":{"sku_num":3}}
+--"sku_num":3  ==> "sku_num":2
+
+
+SELECT
+`data`['id']   AS id
+,`data`['user_id'] AS user_id
+,`data`['sku_id'] AS sku_id
+,`data`['cart_price'] AS cart_price
+,IF(`type` = 'insert',`data`['sku_num'],CAST((CAST(`data`['sku_num'] AS BIGINT) - CAST(`old`['sku_num'] AS BIGINT)) AS STRING))  AS sku_num
+,`data`['sku_name'] AS sku_name
+,`data`['is_checked']  AS is_checked
+,`data`['create_time']  AS create_time
+,`data`['operate_time']  AS operate_time
+,`data`['is_ordered']  AS is_ordered
+,`data`['order_time']  AS order_time
+,ts
+FROM topic_db
+WHERE `database` = 'gmall'
+AND `table` = 'cart_info'
+AND (`type` = 'insert'
+         OR
+     (`type` = 'update' AND `old`['sku_num'] IS NOT NULL AND CAST(`data`['sku_num'] AS BIGINT) > CAST(`old`['sku_num'] AS BIGINT))
+    )
+;
+
+--输出到kafka映射
+
+CREATE TABLE dwd_trade_cart_add(
 id STRING
 ,user_id STRING
-,nick_name STRING
 ,sku_id STRING
-,spu_id STRING
-,order_id STRING
-,appraise_code STRING
-,appraise_name STRING
-,comment_txt STRING
+,cart_price STRING
+,sku_num STRING
+,sku_name STRING
+,is_checked STRING
 ,create_time STRING
 ,operate_time STRING
+,is_ordered STRING
+,order_time STRING
+,ts BIGINT
+)
