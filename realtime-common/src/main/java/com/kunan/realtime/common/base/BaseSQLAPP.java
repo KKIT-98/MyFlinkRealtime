@@ -90,5 +90,5 @@ public abstract class BaseSQLAPP {
                 ")");
     }
     //抽象方法
-    public abstract void handle(StreamTableEnvironment tableEnv,StreamExecutionEnvironment env,String ckAndGroupId);
+    public abstract void handle(StreamTableEnvironment tableEnv,StreamExecutionEnvironment env,String groupId);
 }

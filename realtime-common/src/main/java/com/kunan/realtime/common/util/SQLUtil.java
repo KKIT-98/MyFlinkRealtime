@@ -35,4 +35,15 @@ public class SQLUtil {
                 ")";
 
     }
+    //获取upsert kafka连接 创建表格语句最后一定要声明主键
+    public static String getUpsertKafkaSQL(String topicName){
+
+        return "WITH (\n" +
+                "  'connector' = 'upsert-kafka',\n" +
+                "  'topic' = '" + topicName + "',\n" +
+                "  'properties.bootstrap.servers' = '" + Constant.KAFKA_BROKERS + "',\n" +
+                "  'key.format' = 'json',\n" +
+                "  'value.format' = 'json'\n" +
+                ");";
+    }
 }

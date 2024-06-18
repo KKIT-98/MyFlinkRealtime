@@ -182,3 +182,106 @@ id STRING
 ,order_time STRING
 ,ts BIGINT
 )
+
+--筛选订单详情表数据SQL
+SELECT
+`data`['id'] id
+,`data`['order_id'] order_id
+,`data`['sku_id'] sku_id
+,`data`['sku_name'] sku_name
+,`data`['order_price'] order_price
+,`data`['sku_num'] sku_num
+,`data`['create_time'] create_time
+,`data`['split_total_amount'] split_total_amount
+,`data`['split_activity_amount'] split_activity_amount
+,`data`['split_coupon_amount'] split_coupon_amount
+,ts
+FROM topic_db
+WHERE  `database` = 'gmall'
+AND `table` = 'order_detail'
+AND `type` = 'insert'
+
+--筛选订单信息表
+SELECT
+`data`['id'] id
+,`data`['province_id'] province_id
+,`data`['user_id'] user_id
+,ts
+FROM topic_db
+WHERE  `database` = 'gmall'
+AND `table` = 'order_info'
+AND `type` = 'insert'
+
+
+
+--筛选订单详情活动关联表
+
+SELECT
+`data`['order_detail_id'] order_detail_id
+,`data`['activity_id'] activity_id
+,`data`['activity_rule_id'] activity_rule_id
+FROM topic_db
+WHERE  `database` = 'gmall'
+AND `table` = 'order_detail_activity'
+AND `type` = 'insert'
+
+
+--筛选订单详情优惠券关联表
+
+SELECT
+`data`['order_detail_id'] order_detail_id
+,`data`['coupon_id'] coupon_id
+FROM topic_db
+WHERE  `database` = 'gmall'
+AND `table` = 'order_detail_coupon'
+AND `type` = 'insert'
+
+
+--关联以上张表
+
+
+SELECT
+a.id id
+,a.order_id order_id
+,a.sku_id sku_id
+,b.province_id  province_id
+,b.user_id  user_id
+,c.activity_id activity_id
+,c.activity_rule_id activity_rule_id
+,d.coupon_id coupon_id
+,a.sku_name sku_name
+,a.order_price order_price
+,a.sku_num sku_num
+,a.create_time create_time
+,a.split_total_amount split_total_amount
+,a.split_activity_amount split_activity_amount
+,a.split_coupon_amount split_coupon_amount
+,a.ts
+FROM order_detail a
+JOIN order_info b
+ON a.order_id = b.id
+LEFT JOIN order_detail_activity c
+ON a.id = c.order_detail_id
+LEFT JOIN order_detail_coupon d
+on a.id = d.order_detail_id
+
+--创建
+create table (
+id STRING
+,order_id STRING
+,sku_id STRING
+,province_id STRING
+,user_id STRING
+,activity_id STRING
+,activity_rule_id STRING
+,coupon_id STRING
+,sku_name STRING
+,order_price STRING
+,sku_num STRING
+,create_time STRING
+,split_total_amount STRING
+,split_activity_amount STRING
+,split_coupon_amount STRING
+,ts BIGINT
+,PRIMARY KEY (id) NOT ENFORCED
+)

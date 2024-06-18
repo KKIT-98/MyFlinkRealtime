@@ -6,7 +6,37 @@
 > - 尚硅谷大数据项目之电商数仓V6.0 前68节学完
 > - 熟悉大数据相关组件
 > - 熟悉Linux
->
+
+## 2024-06-18
+- 1.筛选订单详情、筛选订单信息表 订单详情活动关联表、订单详情优惠券关联表
+- 2.以上四张表使用flinkSQL关联
+- 3.将关联后的结果表发送到kafka（使用了left join 会产生撤回流必须使用upsert kafka连接器）
+
+```bash
+#kafka消费数据最终关联后的数据
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_trade_order_detail 
+
+```
+
+
+:white_check_mark: flink实时项目组件启动顺序
+```bash
+# 1.hadoop        
+start_or_stop_myhadoop.sh start
+# 2.zookeeper     
+start-zookeeper.sh start
+# 3.kafka         
+start-kafka.sh start
+# 4.hbase(hbase安装包自带)
+start-hbase.sh
+# 5.maxwell
+start-maxwell.sh start
+
+```
+
+
+
+
 ## 2024-05-15
 
 筛选加购事务事实表，并写出到kafka
