@@ -7,6 +7,27 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 
+## 2024-06-19
+
+1. 从topic_db筛选取消订单数据(操作类型为update、修改了order_status字段、修改后的order_status字段值为1003)
+2. 取消订单数据与下单事实表(昨天的结果表)关联
+3. 关联后宽表发送到kafka
+4. 从topic_db筛选支付成功数据
+5. 从dwd_trade_order_detail主题中读取订单事实数据、LookUp字典表，关联三张表形成支付成功宽表，写入Kafka支付成功主题。
+
+要点:
+- Interval Join: **间隔关联**，关联的两张表需要**事件时间/处理时间**
+- Lookup Join: **查找联接**通常用于使用从外部系统查询的数据来丰富表。联接要求一个表具有处理时间属性，另一个表由查找源连接器支持
+
+【测试】
+
+```bash
+# 取消订单事实表
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_trade_order_cancel
+# 支付成功事实表
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_trade_order_payment_success 
+```
+
 ## 2024-06-18
 1. 筛选订单详情、筛选订单信息表 订单详情活动关联表、订单详情优惠券关联表
 2. 以上四张表使用flinkSQL关联

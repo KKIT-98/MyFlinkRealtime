@@ -22,7 +22,9 @@ public class SQLUtil {
                 "`data` map<STRING,STRING>,\n" +
                 "`old` map<STRING,STRING>,\n" +
                 "`type` STRING,\n" +
-                "proc_time  AS PROCTIME() \n" +
+                "proc_time  AS PROCTIME(), \n" +
+                "row_time  AS TO_TIMESTAMP_LTZ(ts * 1000,3), \n" +
+                "WATERMARK FOR row_time AS row_time - INTERVAL '5' SECOND \n" +
                 ")" + getKafkaSourceSQL(Constant.TOPIC_DB,GroupId);
     }
     //使用FlinkSql将数据写入kafka

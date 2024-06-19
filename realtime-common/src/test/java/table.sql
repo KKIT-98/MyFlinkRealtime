@@ -285,3 +285,193 @@ id STRING
 ,ts BIGINT
 ,PRIMARY KEY (id) NOT ENFORCED
 )
+
+
+--从kafka读取dwd层下单事务事实表数据
+
+Constant.TOPIC_DWD_TRADE_ORDER_DETAIL
+
+create table (
+id STRING
+,order_id STRING
+,sku_id STRING
+,province_id STRING
+,user_id STRING
+,activity_id STRING
+,activity_rule_id STRING
+,coupon_id STRING
+,sku_name STRING
+,order_price STRING
+,sku_num STRING
+,create_time STRING
+,split_total_amount STRING
+,split_activity_amount STRING
+,split_coupon_amount STRING
+,ts BIGINT
+)
+
+
+
+--从 topic_db 筛选出订单取消数据
+
+SELECT
+`data`['id'] id
+,`data`['operate_time'] operate_time
+,ts
+FROM topic_db
+WHERE `database` = 'gmall'
+AND `table` = 'order_info'
+AND `type` = 'update'
+AND `old`['order_status'] = '1001'
+AND `data`['order_status'] = '1003'
+
+--订单取消表和下单表进行 join
+
+SELECT
+ a.id as id
+,a.order_id as order_id
+,a.sku_id as sku_id
+,a.province_id as province_id
+,a.user_id as user_id
+,a.activity_id as activity_id
+,a.activity_rule_id as activity_rule_id
+,a.coupon_id as coupon_id
+,date_format(b.operate_time, 'yyyy-MM-dd') as order_cancel_date_id
+,b.operate_time as operate_time
+,a.sku_name as sku_name
+,a.order_price as order_price
+,a.sku_num as sku_num
+,a.create_time as create_time
+,a.split_total_amount as split_total_amount
+,a.split_activity_amount as split_activity_amount
+,a.split_coupon_amount as split_coupon_amount
+,b.ts as ts
+FROM Constant.TOPIC_DWD_TRADE_ORDER_DETAIL a
+JOIN order_cancel b
+ON a.order_id = b.id
+
+
+--将关联后的宽表写出到kafka
+
+
+
+create table dwd_trade_order_cancel_detail(
+ id STRING
+,order_id STRING
+,sku_id STRING
+,province_id STRING
+,user_id STRING
+,activity_id STRING
+,activity_rule_id STRING
+,coupon_id STRING
+,order_cancel_date_id STRING
+,operate_time STRING
+,sku_name STRING
+,order_price STRING
+,sku_num STRING
+,create_time STRING
+,split_total_amount STRING
+,split_activity_amount STRING
+,split_coupon_amount STRING
+,ts BIGINT
+)
+
+--从topic_db筛选支付成功的数据
+
+
+SELECT
+`data`['id'] AS id
+,`data`['order_id'] AS order_id
+,`data`['user_id'] AS user_id
+,`data`['payment_type'] AS payment_type
+,`data`['total_amount'] AS total_amount --订单总金额
+,`data`['callback_time'] AS callback_time
+,ts
+FROM topic_db
+WHERE  `database` = 'gmall'
+AND `table` = 'payment_info'
+AND `type` = 'update'
+AND `old`['payment_status'] IS NOT NULL
+AND `data`['payment_status'] = '1602'
+
+--使用interval join完成支付成功流和订单流数据关联
+
+
+SELECT
+b.id AS id
+,a.order_id AS order_id
+,a.user_id AS user_id
+,a.payment_type AS payment_type
+,a.callback_time AS payment_time
+,b.sku_id AS sku_id
+,b.province_id AS province_id
+,b.activity_id AS activity_id
+,b.activity_rule_id AS activity_rule_id
+,b.coupon_id AS coupon_id
+,b.sku_name AS sku_name
+,b.order_price AS order_price
+,b.sku_num AS sku_num
+,b.split_total_amount AS split_total_amount
+,b.split_activity_amount AS split_activity_amount
+,b.split_coupon_amount AS split_coupon_amount
+,a.ts AS ts
+FROM payment a,order_detail b
+where a.order_id = b.order_id
+AND a.row_time BETWEEN b.row_time - INTERVAL '15' MINUTE AND b.row_time + INTERVAL '5' SECOND
+
+
+--使用lookup join完成维度退化
+
+SELECT
+ a.id AS id
+,a.order_id AS order_id
+,a.user_id AS user_id
+,a.payment_type AS payment_type_code
+,b.info.dic_name AS payment_type_name
+,a.payment_time AS payment_time
+,a.sku_id AS sku_id
+,a.province_id AS province_id
+,a.activity_id AS activity_id
+,a.activity_rule_id AS activity_rule_id
+,a.coupon_id AS coupon_id
+,a.sku_name AS sku_name
+,a.order_price AS order_price
+,a.sku_num AS sku_num
+,a.split_total_amount AS split_total_amount
+,a.split_activity_amount AS split_activity_amount
+,a.split_coupon_amount AS split_coupon_amount
+,a.ts AS ts
+FROM pay_order a
+LEFT JOIN base_dic FOR SYSTEM_TIME AS OF a.proc_time AS b
+ON a.payment_type = b.rowkey
+
+
+--lookup join 示例
+--SELECT o.order_id, o.total, c.country, c.zip
+--FROM Orders AS o
+--  JOIN Customers FOR SYSTEM_TIME AS OF o.proc_time AS c
+--    ON o.customer_id = c.id;
+
+
+--创建结果集表
+
+CREATE TABLE (
+ id STRING
+,order_id STRING
+,user_id STRING
+,payment_type_code STRING
+,payment_type_name STRING
+,payment_time STRING
+,sku_id STRING
+,province_id STRING
+,activity_id STRING
+,activity_rule_id STRING
+,coupon_id STRING
+,sku_name STRING
+,order_price STRING
+,sku_num STRING
+,split_total_amount STRING
+,split_activity_amount STRING
+,split_coupon_amount STRING
+,ts BIGINT
+)
