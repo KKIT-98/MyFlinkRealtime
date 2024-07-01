@@ -475,3 +475,20 @@ CREATE TABLE (
 ,split_coupon_amount STRING
 ,ts BIGINT
 )
+
+--------------------------------------------------------------
+--【DWS层】
+
+CREATE TABLE page_info(
+`common` map<STRING,STRING>
+,`page` map<STRING,STRING>
+,`ts` bigint
+)
+
+SELECT
+page['item']  keyword
+,`ts`
+FROM page_info
+WHERE page['last_page_id'] = 'search'
+AND page['item_type'] = 'keyword'
+AND page['item'] IS NOT NULL

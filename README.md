@@ -7,6 +7,27 @@
 > - 熟悉大数据相关组件
 > - 熟悉Linux
 
+## 2024-07-01
+
+从DWD层TOPIC_DWD_TRAFFIC_PAGE主题读取页面表筛选出关键字字段
+注意要启动项目```DwdBaseLog```模块
+
+
+```bash
+# 启动flume采集日志
+start-flume-logToKafka.sh start
+
+# kafka消费提取样例数据
+kafka-console-consumer.sh --bootstrap-server 192.168.31.102:9092 --topic dwd_traffic_page --from-beginning
+
+#样例数据
+#{"common":{"ar":"12","uid":"1007","os":"iOS 13.2.9","ch":"Appstore","is_new":"0","md":"iPhone 14","mid":"mid_343","vc":"v2.1.132","ba":"iPhone","sid":"8500914a-a126-4b0d-88bf-7d87c38ee845"},"page":{"page_id":"register","item":"1007","during_time":15000,"item_type":"user_id","last_page_id":"good_detail"},"ts":1712022852216}
+
+
+```
+
+
+
 ## 2024-06-20
 
 【事实表动态分流】
